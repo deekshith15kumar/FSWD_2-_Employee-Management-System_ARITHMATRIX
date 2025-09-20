@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Employee Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    body { font-family: Arial; margin: 40px; }
+    table { width: 100%; border-collapse: collapse;}
+    th, td { border: 1px solid #ddd; padding: 8px; }
+    th { background: #eee;}
+    tr:nth-child(even) {background: #f9f9f9;}
+    .actions button { margin-right: 8px;}
+    @media (max-width:600px){ td,th{font-size:14px;} }
+  </style>
+</head>
+<body>
+<h2>Employees</h2>
+<button onclick="showAddForm()">Add Employee</button>
+<table>
+  <thead>
+    <tr><th>Name</th><th>Role</th><th>Salary</th><th class="actions">Actions</th></tr>
+  </thead>
+  <tbody id="employees"></tbody>
+</table>
+
+<!-- Add/Edit Employee Modal -->
+<div id="modal" style="display:none; position:fixed; top:15%; left:50%; transform:translateX(-50%); background:#fff; border:1px solid #ccc; padding:20px; z-index:100;">
+  <h3 id="modalTitle">Add Employee</h3>
+  <form id="empForm">
+    <input type="hidden" id="empId">
+    <label>Name:</label><input type="text" id="empName" required><br>
+    <label>Role:</label><input type="text" id="empRole" required><br>
+    <label>Salary:</label><input type="number" id="empSalary" required><br><br>
+    <button type="submit">Save</button>
+    <button type="button" onclick="hideModal()">Cancel</button>
+  </form>
+</div>
+
+<script>
+let employees = [];
+const API = "http://localhost:7000";
+const TOKEN = localStorage.getItem("token");
+
+// Fetch employees
+async function fetchEmployees(){
+  const res = await fetch(`${API}/employees`);
+  employees = await res.json();
+  renderEmployees();
+}
+function renderEmployees(){
+  const tb = document.getElementById("employees");
+  tb.innerHTML = "";
+  employees.forEach(emp => {
+    tb.innerHTML += `
+      <tr>
+        <td>${emp.name}</td>
+        <td>${emp.role}</td>
+        <td>${emp.salary}</td>
+        <td class="actions">
+          <button onclick="editEmp(${emp.id})">Edit</button>
+          <button onclick="deleteEmp(${emp.id})">Delete</button>
+        </td>
+      </tr>`;
+  });
+}
+fetchEmployees();
+
+// Show modal to add
+function showAddForm(){
+  document.getElementById("empId").value = "";
+  document.getElementById("empName").value = "";
+  document.getElementById("empRole").value = "";
+  document.getElementById("empSalary").value = "";
+  document.getElementById("modalTitle").innerText = "Add Employee";
+  document.getElementById("modal").style.display = "block";
+}
+
+// Show modal to edit
+function editEmp(id){
+  const emp = employees.find(e=>e.id===id);
+  document.getElementById("empId").value = id;
+  document.getElementById("empName").value = emp.name;
+  document.getElementById("empRole").value = emp.role;
+  document.getElementById("empSalary").value = emp.salary;
+  document.getElementById("modalTitle").innerText = "Edit Employee";
+  document.getElementById("modal").style.display = "block";
+}
+
+// Hide modal
+function hideModal(){
+  document.getElementById("modal").style.display = "none";
+}
+
+// Submit add/edit form
+document.getElementById("empForm").addEventListener("submit", async function(e){
+  e.preventDefault();
+  const id = document.getElementById("empId").value;
+  const name = document.getElementById("empName").value;
+  const role = document.getElementById("empRole").value;
+  const salary = document.getElementById("empSalary").value;
+  let method = "POST", url = `${API}/employees`;
+  let body = JSON.stringify({ name, role, salary });
+
+  let headers = { "Content-Type": "application/json", "Authorization": "Bearer " + TOKEN };
+  if(id){
+    method = "PUT"; url = `${API}/employees/${id}`;
+  }
+  const res = await fetch(url, {method, headers, body});
+  const data = await res.json();
+  alert(data.msg || data.error);
+  hideModal();
+  fetchEmployees();
+});
+
+// Delete employee
+async function deleteEmp(id){
+  if(!confirm("Delete?")) return;
+  const headers = { "Authorization": "Bearer " + TOKEN };
+  const res = await fetch(`${API}/employees/${id}`, {method:"DELETE", headers});
+  const data = await res.json();
+  alert(data.msg || data.error);
+  fetchEmployees();
+}
+
+</script>
+</body>
+</html>
