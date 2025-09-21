@@ -114,8 +114,8 @@ This project is licensed under the MIT License.
 
 ## Author
 
-*Your Name*  
-*Your Contact Info*  
-*LinkedIn/GitHub profile links (optional)*
+K DEEKSHITH KUMAR   
+kattadeekshith15@gmail.com  
+[text](https://www.linkedin.com/in/deekshith-kumar-17302b21a/)
 
 ---
