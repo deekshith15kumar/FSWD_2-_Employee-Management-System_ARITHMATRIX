@@ -118,4 +118,5 @@ K DEEKSHITH KUMAR
 kattadeekshith15@gmail.com  
 [text](https://www.linkedin.com/in/deekshith-kumar-17302b21a/)
 
+Internship Task @Arithmatrix Technologies
 ---
